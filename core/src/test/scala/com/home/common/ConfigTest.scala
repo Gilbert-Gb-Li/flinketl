@@ -1,3 +1,5 @@
+package com.home.common
+
 import java.io.File
 
 import com.typesafe.config.ConfigFactory

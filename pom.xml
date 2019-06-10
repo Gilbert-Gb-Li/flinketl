@@ -4,13 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--父pom文件起继承作用-->
+
     <groupId>com.home</groupId>
-    <artifactId>flink-etl</artifactId>
+    <artifactId>bigdata-etl-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
+
+    <!-- 使用refactor功能更改 -->
+    <!--1.rename director 会直接更改掉本地文件目录名，相应的左侧导航栏会变且module依赖要更新-->
+    <!--2.rename module 相当于别名，左侧导航栏出现[xxxxx]字样，module无须更改-->
+    <!--3.更改顶层module名须更新链接-->
     <modules>
         <module>core</module>
+        <module>build</module>
     </modules>
+
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>
@@ -21,37 +32,44 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-    <!-- https://mvnrepository.com/artifact/org.scala-lang/scala-library -->
+
+    <!-- dependencyManagement 不会向子类真的导入依赖，只是起到一个约束的作用 -->
+    <!-- <dependencyManagement> -->
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.home</groupId>-->
+            <!--<artifactId>core</artifactId>-->
+            <!--<version>1.0-SNAPSHOT</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.prefix.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-scala_${scala.prefix.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-scala_${scala.prefix.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -69,30 +87,18 @@
             <version>1.3.4</version>
         </dependency>
     </dependencies>
+    <!--</dependencyManagement>-->
 
     <build>
-        <plugins>
+    <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
+            <artifactId>maven-jar-plugin</artifactId>
             <version>2.4</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <descriptors>
-                        <descriptor>src/main/assembly/package.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flink-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+        </plugin>
+    </plugins>
     </build>
 
+    <pluginRepositories>
+    </pluginRepositories>
 </project>

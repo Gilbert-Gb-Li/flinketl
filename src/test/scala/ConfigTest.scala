@@ -7,7 +7,7 @@ object ConfigTest {
 
   def main(args: Array[String]): Unit = {
 
-    val conf = ConfigFactory.parseFile(new File("conf/test.conf"))
+    val conf = ConfigFactory.parseFile(new File("conf/app.conf"))
 
     println("The answer is: " + conf.getInt("a"))
   }
