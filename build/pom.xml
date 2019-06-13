@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <!--单独创建一个module用于打包-->
     <artifactId>bigdata-build</artifactId>
 
     <build>

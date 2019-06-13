@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR" monitorInterval="300">
+    <Properties>
+        <!-- 配置日志文件输出目录 -->
+        <Property name="LOG_HOME">logs</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT"> <!-- 定义类型为Console的Appender -->
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{HH:mm:ss} [%level] %c{10} - %msg%n"/> <!-- 定义类型为Pattern的Layout -->
+        </Console>
+        <!--处理error级别的日志，并把该日志放到logs/error.log文件中-->
+
+        <RollingFile name="RollingFileError" fileName="${LOG_HOME}/platform-error.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/platform-error-%d{yyyy-MM-dd}-%i.log.gz">
+            <ThresholdFilter level="ERROR"/>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5level %class{36} %L %M - %msg%xEx%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <!--定义logger，只有定义了logger并引入上面的appender，appender才会生效-->
+    <Loggers>
+        <Root level="debug"> <!-- 定义Root Logger -->
+            <AppenderRef ref="Console"/> <!-- Root Logger的Appender引用上面定义的Console -->
+        </Root>
+        <!--定义名字为MainLogger的Logger，其日志级别为info，info以下级别的信息将不会输出 -->
+        <Logger name="MainLogger" level="info" additivity="false">
+            <AppenderRef ref="RollingFileError"/> <!-- Root Logger的Appender引用上面定义的Console -->
+        </Logger>
+    </Loggers>
+</Configuration>
