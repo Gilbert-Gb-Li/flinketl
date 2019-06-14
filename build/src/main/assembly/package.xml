@@ -55,6 +55,7 @@
 
     <!-- 将其他子模块jar文件打包到lib目录下-->
     <!-- <include>格式为groupId:artifactId 且 useAllReactorProjects为true-->
+    <!-- 也可以通过pom文件中加入dependency实现 -->
     <moduleSets>
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>

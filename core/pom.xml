@@ -13,39 +13,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>bigdata-core</artifactId>
-    <!-- 此处依赖jar可以不知道，会自动调用父模块的依赖包 -->
-    <!--<dependencies>-->
-        <!--<dependency>-->
-            <!--<groupId>org.scala-lang</groupId>-->
-            <!--<artifactId>scala-library</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.flink</groupId>-->
-            <!--<artifactId>flink-java</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.flink</groupId>-->
-            <!--<artifactId>flink-streaming-java_${scala.prefix.version}</artifactId>-->
-        <!--</dependency>-->
 
-        <!--<dependency>-->
-            <!--<groupId>org.apache.flink</groupId>-->
-            <!--<artifactId>flink-scala_${scala.prefix.version}</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.flink</groupId>-->
-            <!--<artifactId>flink-streaming-scala_${scala.prefix.version}</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>slf4j-log4j12</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>log4j</groupId>-->
-            <!--<artifactId>log4j</artifactId>-->
-        <!--</dependency>-->
+
+    <!-- 此处依赖jar可以不指定，会自动调用父模块的依赖包 -->
+    <!--<dependencies>-->
     <!--</dependencies>-->
 
 
+    <!-- plugin可以不指定，会自动调用父模块 -->
+    <!--<build>-->
+        <!--<plugins>-->
+        <!--</plugins>-->
+    <!--</build>-->
 
 </project>

@@ -4,8 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!--父pom文件起继承作用-->
-
+    <!--该父pom文件用于子pom继承-->
     <groupId>com.home</groupId>
     <artifactId>bigdata-etl-parent</artifactId>
     <packaging>pom</packaging>
@@ -43,11 +42,16 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.home</groupId>-->
-            <!--<artifactId>core</artifactId>-->
-            <!--<version>1.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+         <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
@@ -147,14 +151,41 @@
     </dependencies>
     <!--</dependencyManagement>-->
 
+
     <build>
+    <!--<pluginManagement> 类似于<dependencyManagement> -->
+    <!--<pluginManagement>-->
     <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jar-plugin</artifactId>
             <version>2.4</version>
         </plugin>
+        <!-- scala 编译工具 -->
+        <!--某些问题解决-->
+        <!--如果直接运行mvn clean package ，会杯具的发现-->
+        <!--[ERROR] /Users/jimmy/Work/IdeaProjects/Default/MyScala/src/main/java/yjmyzz/HelloWorld.java:[7,9] cannot find symbol-->
+        <!--[ERROR] symbol:   class Hello-->
+        <!--[ERROR] location: class yjmyzz.HelloWorld-->
+        <!--原因是mvn clean package默认只处理java源代码的编译、打包，而不管scala，所以编译时遇到Hello这个由scala语言编写的class，此时scala还没编译生成class，所以找不到相应的调用入口。-->
+        <!--解决办法：-->
+        <!--mvn clean scala:compile compile package-->
+        <!--如上，在compile前加入scala:compile，这是maven-scala-plugin插件提供的选项，表示编译scala，这样一来，先编译scala，再编译java，最后打包，妥妥滴！-->
+        <plugin>
+            <groupId>org.scala-tools</groupId>
+            <artifactId>maven-scala-plugin</artifactId>
+            <version>2.15.2</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>compile</goal>
+                        <goal>testCompile</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
     </plugins>
+    <!--</pluginManagement>-->
     </build>
 
     <pluginRepositories>

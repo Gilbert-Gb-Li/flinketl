@@ -8,11 +8,22 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <!--单独创建一个module用于打包-->
+
+
+    <!--须单独创建一个module用于打包-->
     <artifactId>bigdata-build</artifactId>
 
+    <!-- 添加到jar包中也可以通过assembly的moduleSets实现-->
+    <!--<dependencies>-->
+        <!--<dependency>-->
+        <!--<groupId>com.home</groupId>-->
+        <!--<artifactId>bigdata-core</artifactId>-->
+        <!--<version>1.0-SNAPSHOT</version>-->
+        <!--</dependency>-->
+    <!--</dependencies>-->
+
+
     <build>
-        <!--<pluginManagement> 类似于<dependencyManagement> -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -41,7 +52,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <!--</pluginManagement>-->
     </build>
 
 </project>
