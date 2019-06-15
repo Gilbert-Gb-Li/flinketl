@@ -12,10 +12,10 @@
     </dependencySets>
 
 
-    <!-- <directory>为目录而非module路径 -->
+    <!-- <directory>为相对于当前module的路径 -->
     <fileSets>
         <fileSet>
-            <directory>../bin</directory>
+            <directory>src/main/resources/bin</directory>
             <includes>
                 <include>*</include>
             </includes>
@@ -23,7 +23,7 @@
             <outputDirectory>/bin</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../conf</directory>
+            <directory>src/main/resources/conf</directory>
             <includes>
                 <include>*.*</include>
             </includes>
@@ -36,20 +36,20 @@
             </includes>
             <outputDirectory>/logs</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>../src/main/resources</directory>
-            <includes>
-                <include>*</include>
-            </includes>
-            <outputDirectory>/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>../core/src/main/resources</directory>
-            <includes>
-                <include>*.*</include>
-            </includes>
-            <outputDirectory>/conf</outputDirectory>
-        </fileSet>
+        <!--<fileSet>-->
+            <!--<directory>../src/main/resources</directory>-->
+            <!--<includes>-->
+                <!--<include>*</include>-->
+            <!--</includes>-->
+            <!--<outputDirectory>/conf</outputDirectory>-->
+        <!--</fileSet>-->
+        <!--<fileSet>-->
+            <!--<directory>../core/src/main/resources</directory>-->
+            <!--<includes>-->
+                <!--<include>*.*</include>-->
+            <!--</includes>-->
+            <!--<outputDirectory>/conf</outputDirectory>-->
+        <!--</fileSet>-->
     </fileSets>
 
 

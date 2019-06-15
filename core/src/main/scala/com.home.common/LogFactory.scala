@@ -27,7 +27,7 @@ object LogFactory {
   }
 
   def getLog4j2Path: String = {
-    val conf = ConfigFactory.parseFile(new File("conf/app.conf"))
+    val conf = ConfigFactory.parseFile(new File(Constants.APP_CONF_PATH))
     conf.getString("log4j2.path")
   }
 

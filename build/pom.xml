@@ -13,7 +13,7 @@
     <!--须单独创建一个module用于打包-->
     <artifactId>bigdata-build</artifactId>
 
-    <!-- 添加到jar包中也可以通过assembly的moduleSets实现-->
+    <!-- 添加到jar包中也可以通过assembly的moduleSets或fileSets实现-->
     <!--<dependencies>-->
         <!--<dependency>-->
         <!--<groupId>com.home</groupId>-->
@@ -37,8 +37,8 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <descriptors>
-                        <!--相对目录module名开头-->
-                        <descriptor>build/src/main/assembly/package.xml</descriptor>
+                        <!--相对于根目录父module的路径-->
+                        <descriptor>build/src/main/resources/assembly/package.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
