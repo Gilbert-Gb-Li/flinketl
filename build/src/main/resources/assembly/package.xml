@@ -15,7 +15,7 @@
     <!-- <directory>为相对于当前module的路径 -->
     <fileSets>
         <fileSet>
-            <directory>src/main/resources/bin</directory>
+            <directory>../bin</directory>
             <includes>
                 <include>*</include>
             </includes>
@@ -23,7 +23,7 @@
             <outputDirectory>/bin</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>src/main/resources/conf</directory>
+            <directory>../conf</directory>
             <includes>
                 <include>*.*</include>
             </includes>
