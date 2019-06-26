@@ -6,7 +6,7 @@
     </formats>
     <dependencySets>
         <dependencySet>
-            <useProjectArtifact>true</useProjectArtifact>
+            <!--<useProjectArtifact>true</useProjectArtifact>-->
             <outputDirectory>/lib</outputDirectory>
         </dependencySet>
     </dependencySets>
@@ -54,20 +54,20 @@
 
 
     <!-- 将其他子模块jar文件打包到lib目录下-->
-    <!-- <include>格式为groupId:artifactId 且 useAllReactorProjects为true-->
+    <!-- <include>为module name格式为groupId:artifactId 且 useAllReactorProjects为true-->
     <!-- 也可以通过pom文件中加入dependency实现 -->
-    <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <includes>
-                <include>com.home:bigdata-core</include>
-            </includes>
-            <binaries>
-                <outputDirectory>/lib</outputDirectory>
-                <unpack>false</unpack>
-            </binaries>
-        </moduleSet>
-    </moduleSets>
+    <!--<moduleSets>-->
+        <!--<moduleSet>-->
+            <!--<useAllReactorProjects>true</useAllReactorProjects>-->
+            <!--<includes>-->
+                <!--<include>com.home:bigdata-core</include>-->
+            <!--</includes>-->
+            <!--<binaries>-->
+                <!--<outputDirectory>/lib</outputDirectory>-->
+                <!--<unpack>false</unpack>-->
+            <!--</binaries>-->
+        <!--</moduleSet>-->
+    <!--</moduleSets>-->
 
 
     <!--<files>-->

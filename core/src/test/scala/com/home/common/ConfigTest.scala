@@ -11,7 +11,7 @@ object ConfigTest {
 
     val conf = ConfigFactory.parseFile(new File("conf/test.conf"))
 
-    println(conf.getInt("a"))
+    println(conf.getString("error"))
   }
 
 }

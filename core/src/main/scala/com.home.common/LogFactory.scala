@@ -7,7 +7,15 @@ import org.slf4j.{Logger, LoggerFactory}
 
 object LogFactory {
 
-  def getLog4j2: Unit = {
+  def getLogger(c: Class[_]): Logger = {
+    LoggerFactory.getLogger(c)
+  }
+
+  def getLogger(s: String): Logger = {
+    LoggerFactory.getLogger(s)
+  }
+
+  private def getLog4j2: Unit = {
     var source: ConfigurationSource = null
     val log4jFile = new File(getLog4j2Path)
     try
@@ -26,17 +34,9 @@ object LogFactory {
     }
   }
 
-  def getLog4j2Path: String = {
+  private def getLog4j2Path: String = {
     val conf = ConfigFactory.parseFile(new File(Constants.APP_CONF_PATH))
     conf.getString("log4j2.path")
-  }
-
-  def getLogger(c: Class[_]): Logger = {
-    LoggerFactory.getLogger(c)
-  }
-
-  def getLogger(s: String): Logger = {
-    LoggerFactory.getLogger(s)
   }
 
   getLog4j2
