@@ -1,7 +1,6 @@
 package com.home.common
 
 import java.io.{File, FileInputStream}
-import com.typesafe.config.ConfigFactory
 import org.apache.logging.log4j.core.config.{ConfigurationSource, Configurator}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -34,10 +33,7 @@ object LogFactory {
     }
   }
 
-  private def getLog4j2Path: String = {
-    val conf = ConfigFactory.parseFile(new File(Constants.APP_CONF_PATH))
-    conf.getString("log4j2.path")
-  }
+  private def getLog4j2Path: String = Config.getString(Constants.APP_CONF_PATH, "log4j2.path")
 
   getLog4j2
 }

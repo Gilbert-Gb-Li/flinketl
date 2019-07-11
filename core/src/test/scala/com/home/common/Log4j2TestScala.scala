@@ -1,6 +1,5 @@
 package com.home.common
 
-
 object Log4j2TestScala {
 
   class Log4j2TestScala

@@ -1,6 +1,5 @@
 package com.home.common
 
-import java.net.URI
 
 object ClassLoadTest extends App {
 
