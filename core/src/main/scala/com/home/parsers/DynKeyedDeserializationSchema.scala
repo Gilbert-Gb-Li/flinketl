@@ -2,30 +2,23 @@ package com.home.parsers
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.createTypeInformation
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
-import com.fasterxml.jackson.annotation.JsonInclude.Include
-import com.fasterxml.jackson.annotation.PropertyAccessor
-import com.fasterxml.jackson.databind.{ObjectMapper, ObjectReader, SerializationFeature}
-import com.fasterxml.jackson.dataformat.protobuf.ProtobufFactory
-import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchemaLoader
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import com.home.common.Constants
+import com.home.common.{Config, Constants}
+import com.home.parsers.protobuf.PBDeserialization
+import org.apache.flink.api.common.functions.RichMapFunction
+import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.util.serialization.KeyedDeserializationSchema
 
 /**
   * 将 protobuff 存储到map中
   */
-class DynKeyedDeserializationSchema extends KeyedDeserializationSchema[Map[String, Any]] {
+class DynKeyedDeserializationSchema
+  extends KeyedDeserializationSchema[Map[String, Any]] {
 
-  lazy val mapper: ObjectReader = {
-    val schema = ProtobufSchemaLoader.std.parse(Constants.schema)
-    val mapper = new ObjectMapper(new ProtobufFactory) with ScalaObjectMapper
-    mapper.setVisibility(PropertyAccessor.FIELD, Visibility.PUBLIC_ONLY)
-    mapper.registerModule(DefaultScalaModule).setSerializationInclusion(Include.NON_ABSENT)
-    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-    mapper.readerFor(classOf[Map[String, Any]]).`with`(schema)
-  }
+  val VALUE_CODE ="kafka.bili.value.code"
+  val conf = Constants.appConf
+  private val code =
+    if (conf.hasPath(VALUE_CODE)) conf.getString(VALUE_CODE) else "ISO-8859-1"
 
   override def deserialize(messageKey: Array[Byte],
                            message: Array[Byte],
@@ -35,7 +28,10 @@ class DynKeyedDeserializationSchema extends KeyedDeserializationSchema[Map[Strin
       "topic" -> topic,
       "partition" -> partition,
       "offset" -> offset,
-      "value" -> new String(message)
+      "value" -> {
+        new String(message, code)
+        // PBDeserialization.reader.readValue[Map[String, Any]](new String(message, code).getBytes(code)).mkString(";")
+      }
     )
   }
 

@@ -9,17 +9,28 @@
         <!-- 定义类型为Console的Appender -->
         <Console name="Console" target="SYSTEM_OUT">
             <!--日志输出级别同时受ThresholdFilter与logger标签的level控制 -->
-            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{HH:mm:ss} [%level] %c{10} - %msg%n"/>
         </Console>
         <!--处理error级别的日志，并把该日志放到logs/error.log文件中-->
-        <RollingFile name="RollingFileError" fileName="${LOG_HOME}/platform-error.log"
+        <RollingFile name="Logerror" fileName="${LOG_HOME}/bigdata-error.log"
                      filePattern="${LOG_HOME}/$${date:yyyy-MM}/platform-error-%d{yyyy-MM-dd}-%i.log.gz">
-            <ThresholdFilter level="DEBUG"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout
                     pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5level %class{36} %L %M - %msg%xEx%n"/>
             <Policies>
-                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+        <!--处理info级别的日志，并把该日志放到logs/info.log文件中-->
+        <RollingFile name="Loginfo" fileName="${LOG_HOME}/bigdata-info.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/bigdata-info-%d{yyyy-MM-dd}-%i.log.gz">
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5level %class{36} %L %M - %msg%xEx%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
                 <TimeBasedTriggeringPolicy/>
             </Policies>
         </RollingFile>
@@ -29,11 +40,14 @@
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="Console"/>
+	    <AppenderRef ref="Loginfo"/>
+	    <AppenderRef ref="Logerror"/>
         </Root>
         <!--定义名字为MainLogger的Logger，其日志级别为info，info以下级别的信息将不会输出 -->
-        <Logger name="MainLogger" level="error" additivity="false">
+        <!--
+	<Logger name="MainLogger" level="error" additivity="false">
             <AppenderRef ref="RollingFileError"/>
-        </Logger>
+        </Logger> -->
         <!-- 也可以使用类名来定义，特殊处理某一包的日志 -->
         <!--<Logger name="com.home.common" level="info" additivity="false">-->
             <!--<AppenderRef ref="RollingFileError"/>-->

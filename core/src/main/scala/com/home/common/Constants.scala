@@ -9,6 +9,8 @@ object Constants {
   val APP_CONF_PATH = s"${ROOT}conf/app.conf"
   val APP_TEST_PATH = s"${ROOT}conf/test.conf"
 
+  val appConf = Config(APP_CONF_PATH)
+
   val schema =
     """
       |

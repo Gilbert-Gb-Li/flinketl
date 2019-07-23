@@ -7,16 +7,15 @@ import org.junit.Test
 
 object ConfigTest {
 
-
-  def main(args: Array[String]): Unit = {
-
+  @Test
+  def configTest1 (): Unit = {
     val conf = ConfigFactory.parseFile(new File("conf/test.conf"))
-
-    println(conf.getString("error"))
+    println(conf.getIsNull("error"))
   }
 
-  @Test
-  def configTest (): Unit = {
+  def main(args: Array[String]): Unit = {
+    val conf = ConfigFactory.parseFile(new File("conf/test.conf"))
+    println(conf.hasPathOrNull("trace")) // true
   }
 
 }

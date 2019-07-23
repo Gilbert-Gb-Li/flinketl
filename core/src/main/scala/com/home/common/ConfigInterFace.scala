@@ -2,6 +2,8 @@ package com.home.common
 
 trait ConfigInterFace {
 
-  def getString (path: String, key: String): String
+  def getString (key: String): String
+
+  def hasPath (key: String): Boolean
 
 }

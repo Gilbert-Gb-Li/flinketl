@@ -33,7 +33,7 @@ object LogFactory {
     }
   }
 
-  private def getLog4j2Path: String = Config.getString(Constants.APP_CONF_PATH, "log4j2.path")
+  private def getLog4j2Path: String = Constants.appConf.getString("log4j2.path")
 
   getLog4j2
 }
