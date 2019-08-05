@@ -14,7 +14,7 @@
         </Console>
         <!--处理error级别的日志，并把该日志放到logs/error.log文件中-->
         <RollingFile name="Logerror" fileName="${LOG_HOME}/bigdata-error.log"
-                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/platform-error-%d{yyyy-MM-dd}-%i.log.gz">
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/platform-error-%d{yyyy-MM-dd}-%i.log">
             <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout
                     pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5level %class{36} %L %M - %msg%xEx%n"/>
@@ -25,7 +25,7 @@
         </RollingFile>
         <!--处理info级别的日志，并把该日志放到logs/info.log文件中-->
         <RollingFile name="Loginfo" fileName="${LOG_HOME}/bigdata-info.log"
-                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/bigdata-info-%d{yyyy-MM-dd}-%i.log.gz">
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/bigdata-info-%d{yyyy-MM-dd}-%i.log">
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout
                     pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5level %class{36} %L %M - %msg%xEx%n"/>
@@ -40,8 +40,8 @@
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="Console"/>
-	    <AppenderRef ref="Loginfo"/>
-	    <AppenderRef ref="Logerror"/>
+            <AppenderRef ref="Loginfo"/>
+            <AppenderRef ref="Logerror"/>
         </Root>
         <!--定义名字为MainLogger的Logger，其日志级别为info，info以下级别的信息将不会输出 -->
         <!--
