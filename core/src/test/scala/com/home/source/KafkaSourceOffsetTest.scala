@@ -1,7 +1,7 @@
 package com.home.source
 
 import java.util.Properties
-import java.util
+import java.{lang, util}
 
 import com.home.common.LogFactory
 import org.apache.flink.streaming.api.CheckpointingMode
@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironm
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import com.home.parsers.DynKeyedDeserializationSchema
 import org.apache.flink.api.common.functions.{MapFunction, RichMapFunction}
-import org.apache.flink.api.common.state.{MapState, MapStateDescriptor, ValueState, ValueStateDescriptor}
+import org.apache.flink.api.common.state._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
@@ -18,8 +18,9 @@ import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 
 /**
   * KAFKA版本：0.10.1
+  * 验证自定义offset --> 失败
   */
-class StreamingKafkaSource (env: StreamExecutionEnvironment) extends CheckpointedFunction {
+class KafkaSourceOffsetTest (env: StreamExecutionEnvironment) extends CheckpointedFunction {
 
   private val CHECKPOINT_INTERVAL = 30000
   private val CHECKPOINT_MIN_PAUSE = 1000
@@ -39,7 +40,7 @@ class StreamingKafkaSource (env: StreamExecutionEnvironment) extends Checkpointe
   //env.setStateBackend(new RocksDBStateBackend("hdfs://hadoop100:9000/flink/checkpoints",true));
 
   private var PartitonAndOffset: Option[util.Map[KafkaTopicPartition, java.lang.Long]] = None
-  private val logger = LogFactory.getLogger(classOf[StreamingKafkaSource])
+  private val logger = LogFactory.getLogger(classOf[KafkaSourceOffsetTest])
 
   def kafkaSource (servers: String, topic: String, groupId: String): DataStream[Map[String, Any]] = {
     val prop = new Properties()
@@ -48,12 +49,7 @@ class StreamingKafkaSource (env: StreamExecutionEnvironment) extends Checkpointe
     logger.info("kafka.broker [{}], topic [{}], group.id [{}]", servers, topic, groupId)
     val consumer010 = new FlinkKafkaConsumer010[Map[String, Any]](topic, new DynKeyedDeserializationSchema(), prop)
 
-    /** 是否自动提交offset
-      * true : 自动提交，程序重启后会根据上次读取的位置续读，默认值
-      *        但可能出现flink checkpoint与自动提交的offset不一致情况
-      * false: 不自动提交，须使用flink状态手动存储offset并编写kafka续读逻辑
-      */
-    consumer010.setCommitOffsetsOnCheckpoints(false)
+    consumer010.setCommitOffsetsOnCheckpoints(true)
     PartitonAndOffset match {
       case Some(x) => consumer010.setStartFromSpecificOffsets(x)
       case None =>
@@ -64,18 +60,17 @@ class StreamingKafkaSource (env: StreamExecutionEnvironment) extends Checkpointe
 
   def streamFromKafka (ds: DataStream[Map[String, Any]]): DataStream[String] = {
 
-    ds.map(e=> {
-      val k = e.getOrElse("partition", -1).toString.toInt
-      (k, e)
-    }).keyBy(0).map(new OffsetMapFunction)
+    ds.map(new OffsetMapFunction)
 
   }
 
 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {}
 
+  /** 此处未执行初始化，原因不详 */
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    val descriptor = new MapStateDescriptor("offset", classOf[Int], classOf[java.lang.Long])
+    val descriptor = new ListStateDescriptor[util.HashMap[Int, java.lang.Long]](
+      "offset", classOf[util.HashMap[Int, java.lang.Long]])
     logger.info(
       """
         | >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -83,25 +78,25 @@ class StreamingKafkaSource (env: StreamExecutionEnvironment) extends Checkpointe
         | >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       """.stripMargin)
     if (context.isRestored) {
-      val offset = context.getKeyedStateStore.getMapState(descriptor)
-      setKafkaOffset(offset)
+      val offset = context.getOperatorStateStore.getListState(descriptor)
+      val map = offset.get().iterator().next()
+      setKafkaOffset(map)
       logger.info(
         """
           | >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
           | partition 0 's offset: {}
           | >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        """.stripMargin, offset.get(0))
+        """.stripMargin, map.get(0))
     }
   }
 
-  private def setKafkaOffset (offset: MapState[Int, java.lang.Long]): Option[util.HashMap[KafkaTopicPartition, java.lang.Long]] = {
+  private def setKafkaOffset (offset: util.HashMap[Int, java.lang.Long]): Option[util.HashMap[KafkaTopicPartition, java.lang.Long]] = {
     offset match {
       case null => None
       case _ =>
         val po: util.HashMap[KafkaTopicPartition, java.lang.Long] = new util.HashMap()
-        val offsets = offset.iterator()
-        while (offsets.hasNext) {
-          val o = offsets.next()
+        import scala.collection.JavaConversions._
+        for (o <- offset.entrySet) {
           po.put(new KafkaTopicPartition("tv-danmaku-bili", o.getKey), o.getValue)
         }
         Some(po)
@@ -111,18 +106,67 @@ class StreamingKafkaSource (env: StreamExecutionEnvironment) extends Checkpointe
 }
 
 
-/**
-  * 1. 抽取partition及offset写入state中
-  * 2. 将partition为0的offset输出
+// ------------------------------------------------------------------------------------ //
+
+/** MapFunction + CheckpointedFunction
+  * 抽取每条数据的partition及offset写入ListState中
+  *
+  * 1. 继承MapFunction可以配合CheckpointedFunction使用OperatorState
+  * 2. 变量封装在MapFunction中可解决闭包问题，使用状态来解决闭包问题
   */
 class OffsetMapFunction
-  extends RichMapFunction[(Int,Map[String, Any]), String]
-  with CheckpointedFunction {
+  extends MapFunction[Map[String, Any], String]
+    with CheckpointedFunction {
 
   @transient
-  private var offsetState: MapState[Int, java.lang.Long] = _
-  private var t: (Int, Long) = _
+  private var offsetState: ListState[util.HashMap[Int, java.lang.Long]] = _
+  private var offset: util.HashMap[Int, java.lang.Long] = _
 
+
+  override def map(value: Map[String, Any]): String = {
+    val p = value.getOrElse("partition", -1).toString.toInt
+    val o = value.getOrElse("offset", 0).toString.toLong
+    offset.put(p, o)
+    s"partition: $p -> offset: $o"
+
+  }
+
+  /**
+    * snapshot时更新状态
+    * 对于较复杂的状态数据结构比较使用
+    */
+  override def snapshotState(context: FunctionSnapshotContext): Unit = {
+    offsetState.clear()
+    offsetState.add(offset)
+  }
+
+  /**
+    * 状态初始化
+    * 既可以初始化KeyedState也可以初始化OperatorState
+    */
+  override def initializeState(context: FunctionInitializationContext): Unit = {
+    offset = new util.HashMap[Int, java.lang.Long](10)
+    offsetState = context.getOperatorStateStore.getListState[util.HashMap[Int, java.lang.Long]] (
+      new ListStateDescriptor("offset", classOf[util.HashMap[Int, java.lang.Long]])
+    )
+  }
+}
+
+
+// ------------------------------------------------------------------------------------ //
+
+/** RichMapFunction
+  * 抽取每条数据的partition及offset写入ListState中
+  *
+  * 1. 继承RichMapFunction时必须使用KeyedState
+  * 2. 变量封装在MapFunction中可解决闭包问题，使用状态来解决闭包问题
+  */
+class OffsetRichMapFunction
+  extends RichMapFunction[Map[String, Any], String] {
+
+  @transient
+  private var offsetState: ListState[util.HashMap[Int, java.lang.Long]] = _
+  private var offset: util.HashMap[Int, java.lang.Long] = _
 
   /** 1.open方法在map调用前执行，
     *   可用来完成一些诸如数据库初始化工作
@@ -131,27 +175,25 @@ class OffsetMapFunction
     */
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
-    offsetState = getRuntimeContext.getMapState[Int, java.lang.Long] (
-      new MapStateDescriptor("offset", classOf[Int], classOf[java.lang.Long])
+    offset = new util.HashMap[Int, java.lang.Long](10)
+    offsetState = getRuntimeContext.getListState[util.HashMap[Int, java.lang.Long]] (
+      new ListStateDescriptor("offset", classOf[util.HashMap[Int, java.lang.Long]])
     )
   }
 
-  override def map(value: (Int, Map[String, Any])): String = {
-    val p = value._1
-    val o = value._2.getOrElse("offset", 0).toString.toLong
-    t = (p, o)
-    if (p == 0) {s"partition: $p -> offset: $o"}
-    else "-1"
+  /**
+    * 此处更新的状态也会被checkpoint
+    */
+  override def map(value: Map[String, Any]): String = {
+    val p = value.getOrElse("partition", -1).toString.toInt
+    val o = value.getOrElse("offset", 0).toString.toLong
+    offset.put(p, o)
+    s"partition: $p -> offset: $o"
 
   }
 
-  override def close(): Unit = {super.close()}
+  override def close(): Unit = super.close()
 
-  override def snapshotState(context: FunctionSnapshotContext): Unit = {
-    offsetState.put(t._1, t._2)
-  }
-
-  override def initializeState(context: FunctionInitializationContext): Unit = {}
 }
 
 
