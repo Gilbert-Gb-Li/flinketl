@@ -50,8 +50,8 @@ class StreamKafkaSource (env: StreamExecutionEnvironment) {
     import org.apache.flink.api.scala._
     ds.map(e=> {
       if (e.getOrElse("partition", -1) == 0) {
-        val o = e.getOrElse("offset", 0).toString
-        s"partition: 0 -> offset: '$o'"
+        val v = e.getOrElse("value", 0).toString
+        s"partition: 0 -> value: '$v'"
       } else
         "-1"
     })

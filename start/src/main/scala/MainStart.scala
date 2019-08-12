@@ -20,7 +20,7 @@ object MainStart {
     ks.streamFromKafka(ds)
       .filter(_.contains("partition: 0"))
       .writeAsText("file:///home/developer/bili/bigdata-build-1.0-SNAPSHOT/p.txt")
-      // .print()
+      //.print()
     env.execute("BiliPrint")
 
   }
